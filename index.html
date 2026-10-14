@@ -2921,8 +2921,13 @@
 
     // v1.18: เติมโลโก้สีเต็มของ iCare / Super Drug ในหน้าแรก + เก็บโลโก้สี Pharmax ไว้ใน BRAND_LOGOS_COLOR (ไม่ต้องฝัง base64 ซ้ำ)
     function initBrandPickerLogos() {
-    // ปล่อยว่างไว้ เพราะเราใส่ Base64 ลงใน src ของ <img> ใน HTML เรียบร้อยแล้ว
-}
+        const pharmaxImg = document.getElementById('brand_logo_pharmax');
+        if (pharmaxImg) BRAND_LOGOS_COLOR.pharmax = pharmaxImg.src;
+        document.querySelectorAll('img[data-brand-color-logo]').forEach(img => {
+            const brand = img.getAttribute('data-brand-color-logo');
+            if (BRAND_LOGOS_COLOR[brand]) img.src = BRAND_LOGOS_COLOR[brand];
+        });
+    }
 
     // v1.18: โหลดรายชื่อสาขาจาก Google Sheet ทุกครั้งที่เปิด/รีเฟรชหน้าเว็บ (ไม่ cache-first)
     //        เพื่อให้หน้าแรกตรงกับชีทล่าสุดเสมอ ตามที่ต้องการ
