@@ -1143,6 +1143,33 @@
     }, true /* ใช้ capture phase เพื่อดักจับก่อน element อื่น */);
 })();
 
+        /* --- เพิ่มเติมเลย์เอาต์แบบ 3 คอลัมน์ (3 ท่อน) --- */
+        @media screen and (min-width: 1024px) {
+            .app-container {
+                display: flex !important;
+                max-width: 1750px !important;
+                height: calc(100vh - 42px) !important;
+                overflow: hidden !important;
+                gap: 12px !important;
+            }
+            /* สร้างคอลัมน์ที่ 1 และ 2 จากฝั่งซ้ายเดิม */
+            .control-panel {
+                flex: 1.2 !important;
+                height: 100% !important;
+                display: flex !important;
+                flex-direction: column !important;
+                gap: 8px !important;
+                overflow-y: auto !important;
+            }
+            /* จัดพื้นที่ฝั่งขวาให้เป็นคอลัมน์ที่ 3 */
+            .preview-panel {
+                flex: 1.1 !important;
+                height: 100% !important;
+                display: flex !important;
+                flex-direction: column !important;
+                overflow-y: auto !important;
+            }
+        }
 
     </style>
 </head>
