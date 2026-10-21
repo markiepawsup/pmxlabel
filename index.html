@@ -1086,73 +1086,63 @@
 }
 
 // ==========================================================================
-// AUTO-FOCUS & CAPTURE BARCODE SCANNER (v1.27 - Global Listener)
+// ROBUST BARCODE SCANNER CAPTURE (v1.28)
+// หลักการ: บังคับฟังทุกปุ่มที่กดในหน้าเว็บ ถ้าเป็นการยิงรัวและจบด้วย Enter จะดึงค่าเข้าช่องบาร์โค้ดทันที
 // ==========================================================================
 (function() {
-    let scanBuffer = '';
-    let lastKeyTime = 0;
-    const SCANNER_TIMEOUT = 50; // ระยะเวลาห่างระหว่างตัวอักษรของเครื่องยิงบาร์โค้ด (มิลลิวินาที)
+    let buffer = '';
+    let lastTime = 0;
 
-    document.addEventListener('keydown', function(e) {
-        const activeEl = document.activeElement;
+    document.addEventListener('keypress', function(e) {
         const barcodeInput = document.getElementById('in_barcode_scan');
-        
         if (!barcodeInput) return;
 
-        // ถ้าตอนนี้ Cursor อยู่ที่ช่องบาร์โค้ดอยู่แล้ว ปล่อยให้ทำงานตามปกติ
-        if (activeEl === barcodeInput) {
+        // ถ้าโฟกัสอยู่ที่ช่องบาร์โค้ดอยู่แล้ว ปล่อยผ่านให้ทำงานปกติ
+        if (document.activeElement === barcodeInput) {
             return;
         }
 
-        // เช็คเวลาห่างระหว่างตัวอักษร
-        const currentTime = Date.now();
-        const timeDiff = currentTime - lastKeyTime;
-        lastKeyTime = currentTime;
-
-        // ถ้าพิมพ์ช้าเกินไป (เช่นพิมพ์ด้วยมือ > 80ms) ให้เคลียร์ Buffer ทิ้ง เริ่มนับใหม่
-        if (timeDiff > 80 && lastKeyTime !== 0) {
-            scanBuffer = '';
+        // เช็คความเร็วในการพิมพ์ (เครื่องยิงบาร์โค้ดจะส่งตัวอักษรห่างกันน้อยมาก เช่น < 40ms)
+        const now = Date.now();
+        if (lastTime && (now - lastTime > 100)) {
+            buffer = ''; // ถ้ารอนานกว่า 100ms ถือว่าพิมพ์ด้วยมือ เคลียร์ค่าทิ้ง
         }
+        lastTime = now;
 
-        // ถ้ากด Enter และมีข้อมูลใน Buffer ยาวพอ (เช่น บาร์โค้ดสินค้าทั่วไปมักจะยาว 7-13 หลัก)
         if (e.key === 'Enter') {
-            if (scanBuffer.length >= 5) {
-                e.preventDefault(); // ป้องกันไม่ให้ Enter ไปกดปุ่มอื่นในหน้าเว็บ
-                barcodeInput.value = scanBuffer; // เอาค่าที่ยิงได้มาใส่ช่องบาร์โค้ดทันที
-                scanBuffer = '';
+            if (buffer.length >= 4) {
+                e.preventDefault();
+                barcodeInput.value = buffer;
+                buffer = '';
                 
-                // สั่งรันค้นหาบาร์โค้ดทันที
+                // โฟกัสและสั่งค้นหา
+                barcodeInput.focus();
                 if (typeof submitBarcodeLookup === 'function') {
                     submitBarcodeLookup();
                 }
             } else {
-                scanBuffer = '';
+                buffer = '';
             }
             return;
         }
 
-        // เก็บตัวอักษรที่พิมพ์เข้ามา (เฉพาะตัวเลขหรือตัวอักษรปกติ)
+        // สะสมตัวอักษรที่ยิงเข้ามา
         if (e.key.length === 1) {
-            // ถ้าระยะเวลาระหว่างตัวอักษรเร็วมาก (ระดับเครื่องยิงบาร์โค้ด) ให้เก็บบันทึกสะสมไว้
-            if (timeDiff <= SCANNER_TIMEOUT || scanBuffer === '') {
-                scanBuffer += e.key;
-            } else {
-                scanBuffer = e.key;
-            }
-
-            // หาก Buffer ยาวครบ 13 หลัก (ความยาวมาตรฐานบาร์โค้ดสินค้า) และยิงมารัวๆ 
-            // สามารถดึงโฟกัสมาที่ช่องบาร์โค้ดและส่งค่าได้ทันทีโดยไม่ต้องรอ Enter
-            if (scanBuffer.length >= 13) {
+            buffer += e.key;
+            
+            // ถ้าความยาวครบ 13 หลัก (บาร์โค้ดมาตรฐาน) โดยไม่ต้องรอ Enter ให้ย้ายช่องและค้นหาทันที
+            if (buffer.length === 13) {
+                barcodeInput.value = buffer;
+                buffer = '';
                 barcodeInput.focus();
-                barcodeInput.value = scanBuffer;
-                scanBuffer = '';
                 if (typeof submitBarcodeLookup === 'function') {
                     submitBarcodeLookup();
                 }
             }
         }
-    });
+    }, true /* ใช้ capture phase เพื่อดักจับก่อน element อื่น */);
 })();
+
 
     </style>
 </head>
