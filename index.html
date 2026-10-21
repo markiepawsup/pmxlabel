@@ -1084,54 +1084,72 @@
     50% { transform: translateX(150%); }
     100% { transform: translateX(350%); }
 }
+
 // ==========================================================================
-// AUTO-FOCUS BARCODE SCANNER DETECTOR (v1.26 - Adaptive)
+// AUTO-FOCUS & CAPTURE BARCODE SCANNER (v1.27 - Global Listener)
 // ==========================================================================
 (function() {
+    let scanBuffer = '';
     let lastKeyTime = 0;
-    let fastCharCount = 0;
-    
-    // ตั้งค่า Threshold ให้อยู่ในช่วงที่ปลอดภัย (เครื่องสแกนปกติจะส่งข้อมูลด้วยความเร็ว < 30ms ต่อตัวอักษร)
-    const SPEED_THRESHOLD_MS = 60; // ขยายเผื่อให้ครอบคลุมทั้งเครื่องรุ่นเก่าและรุ่นใหม่
-    const MIN_CHARS_FOR_SCAN = 3;  // กำหนดให้พิมพ์รัวติดต่อกันแค่ 3 ตัวอักษรขึ้นไปก็เริ่มทำงานแล้ว
+    const SCANNER_TIMEOUT = 50; // ระยะเวลาห่างระหว่างตัวอักษรของเครื่องยิงบาร์โค้ด (มิลลิวินาที)
 
     document.addEventListener('keydown', function(e) {
         const activeEl = document.activeElement;
         const barcodeInput = document.getElementById('in_barcode_scan');
         
-        if (!barcodeInput || activeEl === barcodeInput) {
-            lastKeyTime = 0;
-            fastCharCount = 0;
+        if (!barcodeInput) return;
+
+        // ถ้าตอนนี้ Cursor อยู่ที่ช่องบาร์โค้ดอยู่แล้ว ปล่อยให้ทำงานตามปกติ
+        if (activeEl === barcodeInput) {
             return;
         }
 
-        // ข้ามปุ่มควบคุม (เช่น Shift, Tab, Enter, ลูกศร) แต่ถ้าเป็น Enter ให้เช็คเผื่อบาร์โค้ดส่ง Enter ปิดท้าย
-        if (e.key.length > 1) {
-            if (e.key === 'Enter' && fastCharCount >= 2) {
-                barcodeInput.focus();
+        // เช็คเวลาห่างระหว่างตัวอักษร
+        const currentTime = Date.now();
+        const timeDiff = currentTime - lastKeyTime;
+        lastKeyTime = currentTime;
+
+        // ถ้าพิมพ์ช้าเกินไป (เช่นพิมพ์ด้วยมือ > 80ms) ให้เคลียร์ Buffer ทิ้ง เริ่มนับใหม่
+        if (timeDiff > 80 && lastKeyTime !== 0) {
+            scanBuffer = '';
+        }
+
+        // ถ้ากด Enter และมีข้อมูลใน Buffer ยาวพอ (เช่น บาร์โค้ดสินค้าทั่วไปมักจะยาว 7-13 หลัก)
+        if (e.key === 'Enter') {
+            if (scanBuffer.length >= 5) {
+                e.preventDefault(); // ป้องกันไม่ให้ Enter ไปกดปุ่มอื่นในหน้าเว็บ
+                barcodeInput.value = scanBuffer; // เอาค่าที่ยิงได้มาใส่ช่องบาร์โค้ดทันที
+                scanBuffer = '';
+                
+                // สั่งรันค้นหาบาร์โค้ดทันที
+                if (typeof submitBarcodeLookup === 'function') {
+                    submitBarcodeLookup();
+                }
+            } else {
+                scanBuffer = '';
             }
             return;
         }
 
-        const currentTime = Date.now();
-        const timeDiff = currentTime - lastKeyTime;
+        // เก็บตัวอักษรที่พิมพ์เข้ามา (เฉพาะตัวเลขหรือตัวอักษรปกติ)
+        if (e.key.length === 1) {
+            // ถ้าระยะเวลาระหว่างตัวอักษรเร็วมาก (ระดับเครื่องยิงบาร์โค้ด) ให้เก็บบันทึกสะสมไว้
+            if (timeDiff <= SCANNER_TIMEOUT || scanBuffer === '') {
+                scanBuffer += e.key;
+            } else {
+                scanBuffer = e.key;
+            }
 
-        if (lastKeyTime !== 0 && timeDiff <= SPEED_THRESHOLD_MS) {
-            fastCharCount++;
-        } else {
-            fastCharCount = 1;
-        }
-
-        lastKeyTime = currentTime;
-
-        // ถ้าพิมพ์รัวด้วยความเร็วสูง
-        if (fastCharCount >= MIN_CHARS_FOR_SCAN) {
-            barcodeInput.focus();
-            
-            // ดึงตัวอักษรที่พิมพ์รัวหลุดไปเมื่อกี้ มาใส่ต่อในช่องบาร์โค้ดทันที (ถ้าเบราว์เซอร์ส่งทัน)
-            // รีเซ็ตค่า
-            lastKeyTime = 0;
-            fastCharCount = 0;
+            // หาก Buffer ยาวครบ 13 หลัก (ความยาวมาตรฐานบาร์โค้ดสินค้า) และยิงมารัวๆ 
+            // สามารถดึงโฟกัสมาที่ช่องบาร์โค้ดและส่งค่าได้ทันทีโดยไม่ต้องรอ Enter
+            if (scanBuffer.length >= 13) {
+                barcodeInput.focus();
+                barcodeInput.value = scanBuffer;
+                scanBuffer = '';
+                if (typeof submitBarcodeLookup === 'function') {
+                    submitBarcodeLookup();
+                }
+            }
         }
     });
 })();
