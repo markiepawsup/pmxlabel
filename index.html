@@ -1092,8 +1092,9 @@
         <div class="home-branch-label" id="home_branch_label">เลือกสาขา (Select Branch)</div>
 
         <!-- v1.22: กรอกรหัสสาขา 3 หลักแบบ OTP เพื่อเลือกสาขาเร็ว (สาขามีเยอะ ไล่หาในรายการยาก) -->
+                <!-- v1.22: ช่องกรอกรหัสสาขา 3 หลักแบบ OTP (เลือกสาขาเร็ว แทนการไล่หาในรายการยาวๆ) -->
         <div class="branch-otp-wrap">
-            <div class="otp-label">กรอกรหัสสาขา 3 หลัก แล้วกด Enter</div>
+            <div class="otp-label">กรอกรหัสสาขา 3 หลัก</div>
             <div class="otp-input-row">
                 <span class="otp-prefix" id="otp_prefix_label"></span>
                 <div class="otp-digit-group" id="otp_digit_group">
@@ -1101,7 +1102,6 @@
                     <input type="text" id="otp_digit_1" class="otp-digit" maxlength="1" inputmode="numeric" pattern="[0-9]*" autocomplete="off">
                     <input type="text" id="otp_digit_2" class="otp-digit" maxlength="1" inputmode="numeric" pattern="[0-9]*" autocomplete="off">
                 </div>
-                <button type="button" class="otp-go-btn" onclick="submitBranchOtp()">ไป ➜</button>
             </div>
             <div class="otp-error" id="branch_otp_error" style="display:none;"></div>
             <button type="button" class="branch-list-toggle-btn" id="branch_list_toggle_btn" onclick="toggleBranchListVisibility()">📋 แสดงรายการสาขาทั้งหมด</button>
