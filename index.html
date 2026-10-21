@@ -1084,6 +1084,59 @@
     50% { transform: translateX(150%); }
     100% { transform: translateX(350%); }
 }
+// ==========================================================================
+// AUTO-FOCUS BARCODE SCANNER DETECTOR (v1.25)
+// ดักจับความเร็วการพิมพ์ (ms) ถ้าพิมพ์รัวระดับความเร็วบาร์โค้ด 
+// จะย้าย Cursor ไปที่ช่องยิงบาร์โค้ด (#in_barcode_scan) ทันที
+// ==========================================================================
+(function() {
+    let lastKeyTime = 0;
+    let fastCharCount = 0;
+    const SPEED_THRESHOLD_MS = 45; // ความเร็วสูงสุดระหว่างตัวอักษร (มิลลิวินาที) ที่ถือว่าเป็นการยิงบาร์โค้ด
+    const MIN_CHARS_FOR_SCAN = 4;  // จำนวนตัวอักษรติดต่อกันที่ต้องพิมพ์รัวถึงจะเข้าเงื่อนไข
+
+    document.addEventListener('keydown', function(e) {
+        // ยกเว้นถ้ากำลังพิมพ์อยู่ใน Modal หรือช่องพิมพ์ที่ไม่อยากให้เด้ง (ถ้ามี)
+        const activeEl = document.activeElement;
+        const barcodeInput = document.getElementById('in_barcode_scan');
+        
+        // ถ้าตอนนี้อยู่ที่ช่องบาร์โค้ดอยู่แล้ว ไม่ต้องทำอะไร ปล่อยให้มันพิมพ์ลงไปตามปกติ
+        if (!barcodeInput || activeEl === barcodeInput) {
+            lastKeyTime = 0;
+            fastCharCount = 0;
+            return;
+        }
+
+        // เช็คปุ่มพิเศษที่ไม่ใช่ตัวอักษรบาร์โค้ด (เช่น Shift, Ctrl, Alt, CapsLock ฯลฯ)
+        if (e.key.length > 1 && e.key !== 'Enter') {
+            return;
+        }
+
+        const currentTime = Date.now();
+        const timeDiff = currentTime - lastKeyTime;
+
+        if (lastKeyTime !== 0 && timeDiff <= SPEED_THRESHOLD_MS) {
+            fastCharCount++;
+        } else {
+            fastCharCount = 1; // เริ่มนับชุดใหม่ถ้าพิมพ์ช้าลง
+        }
+
+        lastKeyTime = currentTime;
+
+        // ถ้าตรวจพบว่าพิมพ์รัวติดต่อกันครบตามจำนวนที่กำหนด (ความเร็วระดับเครื่องยิง)
+        if (fastCharCount >= MIN_CHARS_FOR_SCAN) {
+            // โฟกัสไปที่ช่องบาร์โค้ดทันที
+            barcodeInput.focus();
+            
+            // หากปุ่มแรกๆ เผลอไปพิมพ์ติดค้างอยู่ในช่องเดิม ให้เคลียร์ออก หรือถ้าอยากให้ส่งค่าต่อ ให้ปล่อยไว้
+            // แต่เนื่องจากเครื่องยิงบาร์โค้ดมักจะยิงรัวยาวทีเดียว การเด้งมาช่องนี้จะช่วยเก็บบาร์โค้ดที่เหลือต่อได้ทันที
+            
+            // รีเซ็ตตัวนับ
+            lastKeyTime = 0;
+            fastCharCount = 0;
+        }
+    });
+})();
     </style>
 </head>
 <body onclick="closeAllPopups(event)">
