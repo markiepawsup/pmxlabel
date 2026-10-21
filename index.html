@@ -1143,33 +1143,6 @@
     }, true /* ใช้ capture phase เพื่อดักจับก่อน element อื่น */);
 })();
 
-        /* --- เพิ่มเติมเลย์เอาต์แบบ 3 คอลัมน์ (3 ท่อน) --- */
-        @media screen and (min-width: 1024px) {
-            .app-container {
-                display: flex !important;
-                max-width: 1750px !important;
-                height: calc(100vh - 42px) !important;
-                overflow: hidden !important;
-                gap: 12px !important;
-            }
-            /* สร้างคอลัมน์ที่ 1 และ 2 จากฝั่งซ้ายเดิม */
-            .control-panel {
-                flex: 1.2 !important;
-                height: 100% !important;
-                display: flex !important;
-                flex-direction: column !important;
-                gap: 8px !important;
-                overflow-y: auto !important;
-            }
-            /* จัดพื้นที่ฝั่งขวาให้เป็นคอลัมน์ที่ 3 */
-            .preview-panel {
-                flex: 1.1 !important;
-                height: 100% !important;
-                display: flex !important;
-                flex-direction: column !important;
-                overflow-y: auto !important;
-            }
-        }
 
     </style>
 </head>
@@ -1255,70 +1228,25 @@
 </div>
 
 <div class="app-container">
-     <!-- ========================================== -->
-    <!-- ท่อนที่ 1: คอลัมน์ซ้าย (Card 1: ข้อมูลยา) -->
-    <!-- ========================================== -->
-    <div style="flex: 1; display: flex; flex-direction: column; gap: 10px; height: 100%; overflow-y: auto; padding-right: 4px;">
-        <div class="top-bar-row" style="margin-bottom: 0;">
-            <!-- แถบบน: ปุ่มหน้าแรก และสถานะการเชื่อมต่อ -->
+    <div class="control-panel no-print">
+        <div class="top-bar-row">
             <div style="display:flex; align-items:center; gap:6px;">
-                <button type="button" class="btn-home" onclick="goHome()">🏠 หน้าแรก</button>
+                <button type="button" class="btn-home" onclick="goHome()">🏠 หน้าแรก (เปลี่ยนสาขา)</button>
                 <div class="top-actions-group">
-                    <button type="button" class="btn-help" onclick="openHelpModal()" title="วิธีใช้งาน">❓</button>
-                    <button type="button" class="btn-cheat" onclick="openCheatModal()" title="คู่มือคีย์ลัด">📋</button>
-                    <button type="button" class="btn-stats" onclick="openStatsModal()" title="ดูสถิติ">📊</button>
+                    <button type="button" class="btn-help" onclick="openHelpModal()" title="วิธีใช้งานโปรแกรม" aria-label="วิธีใช้งานโปรแกรม">❓</button>
+                    <button type="button" class="btn-cheat" onclick="openCheatModal()" title="คู่มือคีย์ลัด &amp; สัญลักษณ์" aria-label="คู่มือคีย์ลัด &amp; สัญลักษณ์">📋</button>
+                    <button type="button" class="btn-stats" onclick="openStatsModal()" title="ดูสถิติภาพรวม" aria-label="ดูสถิติภาพรวม">📊</button>
                 </div>
             </div>
             <span class="current-branch-badge" id="current_branch_badge"></span>
-            <span class="conn-status-badge" id="conn_status_badge">
+            <span class="conn-status-badge" id="conn_status_badge" title="สถานะการเชื่อมต่อฐานข้อมูล (ยา/สาขา/ที่อยู่) แบบเรียลไทม์">
                 <span class="conn-dot" id="conn_status_dot"></span>
                 <span id="conn_status_text">กำลังเชื่อมต่อ…</span>
             </span>
         </div>
 
         <div id="translate_warning" class="no-print" style="display:none;">
-            ⚠️ แปลภาษาไม่สำเร็จ — ข้อความยังเป็นภาษาไทย
-        </div>
-
-        <!-- Card 1: ข้อมูลพื้นฐาน ชื่อยา สรรพคุณ -->
-        <div class="ui-card">
-            <h3 class="ui-card-title"><span class="ui-card-num">1</span> ข้อมูลพื้นฐาน ชื่อยา และสรรพคุณ</h3>
-            <!-- (วางโค้ดเนื้อหา Card 1 เดิมของคุณตรงนี้ทั้งหมด: ภาษา, บาร์โค้ด, ชื่อยา, สรรพคุณ) -->
-        </div>
-    </div>
-
-
-    <!-- ========================================== -->
-    <!-- ท่อนที่ 2: คอลัมน์กลาง (Card 2, 3, 4: ขนาดยา คำแนะนำ คิวพิมพ์) -->
-    <!-- ========================================== -->
-    <div style="flex: 1; display: flex; flex-direction: column; gap: 10px; height: 100%; overflow-y: auto; padding-right: 4px;">
-        <!-- Card 2: ขนาดยาและเวลา -->
-        <div class="ui-card">
-            <h3 class="ui-card-title"><span class="ui-card-num">2</span> ขนาดยาและเวลา (Dosage &amp; Timing)</h3>
-            <!-- (วางเนื้อหา Card 2 เดิมของคุณ: ชนิดยา, มื้ออาหาร, ช่องเช้า/กลางวัน/เย็น/นอน) -->
-        </div>
-
-        <!-- Card 3: คำแนะนำและคำเตือน -->
-        <div class="ui-card">
-            <h3 class="ui-card-title"><span class="ui-card-num">3</span> คำแนะนำและคำเตือน (Advice)</h3>
-            <!-- (วางเนื้อหา Card 3 เดิมของคุณ: คำแนะนำเพิ่มเติม) -->
-        </div>
-
-        <!-- Card 4: การดำเนินการและคิวพิมพ์ -->
-        <div class="ui-card">
-            <h3 class="ui-card-title"><span class="ui-card-num">4</span> การดำเนินการและคิวพิมพ์ (Batch Queue)</h3>
-            <!-- (วางเนื้อหา Card 4 เดิมของคุณ: ปุ่มเพิ่มเข้าคิว, พิมพ์ทันที, รายการในคิว Batch) -->
-        </div>
-    </div>
-
-
-    <!-- ========================================== -->
-    <!-- ท่อนที่ 3: คอลัมน์ขวา (Preview ฉลากเดิมของคุณ) -->
-    <!-- ========================================== -->
-    <div class="preview-panel" style="flex: 1.1; height: 100%; overflow-y: auto;">
-        <!-- (วางโค้ดฝั่งขวาเดิมของคุณทั้งหมด: ตัวอย่าง Preview ฉลาก, ปุ่มปรับขนาดฟอนต์, Quick Queue Widget) -->
-    </div>
-
+            ⚠️ แปลภาษาไม่สำเร็จ (อาจเพราะไม่มีอินเทอร์เน็ต หรือเครือข่ายบล็อก) — ข้อความยังเป็นภาษาไทยอยู่บนฉลาก กด "ลองแปลใหม่" หรือตรวจสอบอินเทอร์เน็ตก่อนพิมพ์
         </div>
 
         <div class="ui-card">
