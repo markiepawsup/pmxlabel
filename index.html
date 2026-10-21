@@ -1058,6 +1058,32 @@
             .batch-queue-section, .btn-row, .form-group:has(#favorite_preset_select) { display: none !important; }
             #batch_print_container { position: static; left: auto; visibility: visible; }
         }
+    /* --- แถบแสดงความคืบหน้าการโหลดสาขา --- */
+.branch-loading-bar-wrap {
+    width: 100%;
+    max-width: 300px;
+    height: 6px;
+    background: #eef1f4;
+    border-radius: 3px;
+    overflow: hidden;
+    margin: 8px auto 0;
+    display: none;
+}
+.branch-loading-bar-wrap.show {
+    display: block;
+}
+.branch-loading-bar-inner {
+    width: 30%;
+    height: 100%;
+    background: var(--color-navy);
+    border-radius: 3px;
+    animation: branchLoadingAnim 1.2s infinite ease-in-out;
+}
+@keyframes branchLoadingAnim {
+    0% { transform: translateX(-100%); }
+    50% { transform: translateX(150%); }
+    100% { transform: translateX(350%); }
+}
     </style>
 </head>
 <body onclick="closeAllPopups(event)">
@@ -1085,6 +1111,15 @@
 <button type="button" class="brand-logo-btn brand-superdrug" data-brand="superdrug" onclick="selectBrand('superdrug')">
     <span><img id="brand_logo_superdrug" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=" data-brand-color-logo="superdrug" alt="Super Drug"></span>
 </button>
+    </div>
+        </div> <!-- ปิด brand_picker เดิม -->
+
+    <!-- ⏳ แถบแสดงสถานะกำลังโหลดข้อมูลสาขา -->
+    <div id="branch_loading_container" style="text-align: center; margin: 10px 0; display: none;">
+        <div style="font-size: 0.8rem; color: var(--color-navy); font-weight: 600;" id="branch_loading_text">⏳ กำลังซิงค์รายชื่อสาขาล่าสุดจาก Google Sheet...</div>
+        <div class="branch-loading-bar-wrap show" id="branch_loading_bar">
+            <div class="branch-loading-bar-inner"></div>
+        </div>
     </div>
 
     <div id="home_branch_section">
@@ -2937,16 +2972,30 @@
     // v1.18: โหลดรายชื่อสาขาจาก Google Sheet ทุกครั้งที่เปิด/รีเฟรชหน้าเว็บ (ไม่ cache-first)
     //        เพื่อให้หน้าแรกตรงกับชีทล่าสุดเสมอ ตามที่ต้องการ
     async function initHomeScreen() {
-        initBrandPickerLogos();
-        // v1.22: วาดจากแคชทันทีแบบ sync ก่อนเลย ไม่ต้องรอ network - กดเลือกแบรนด์ได้ทันทีแม้เน็ตช้า/หลุดอยู่
-        BranchDirectory.loadFromCacheSync();
-        if (currentHomeBrand) renderBranchButtons(currentHomeBrand); // เผื่อผู้ใช้เลือกแบรนด์ไปแล้วระหว่างรอโหลด
-        const result = await BranchDirectory.load();
-        if (currentHomeBrand) renderBranchButtons(currentHomeBrand); // รีเฟรชอีกครั้งด้วยข้อมูลสดล่าสุดจาก Sheet
-        if (result.error && !result.fromCache) {
-            console.warn('[BranchDirectory] ไม่สามารถโหลดรายชื่อสาขาได้ และไม่มีแคชสำรอง:', result.error);
-        }
+    initBrandPickerLogos();
+    
+    // 1) วาดจากแคชทันทีเพื่อให้กดเลือกใช้งานได้ไว
+    BranchDirectory.loadFromCacheSync();
+    if (currentHomeBrand) renderBranchButtons(currentHomeBrand);
+
+    // 2) แสดงแถบกำลังโหลดข้อมูลสดจาก Google Sheet
+    const loadContainer = document.getElementById('branch_loading_container');
+    const loadText = document.getElementById('branch_loading_text');
+    if (loadContainer) loadContainer.style.display = 'block';
+    if (loadText) loadText.textContent = '⏳ กำลังดึงรายชื่อสาขาล่าสุดจาก Google Sheet...';
+
+    // 3) ดึงข้อมูลสดจริง
+    const result = await BranchDirectory.load();
+    
+    // 4) ซ่อนแถบโหลดเมื่อเสร็จสิ้น
+    if (loadContainer) loadContainer.style.display = 'none';
+
+    if (currentHomeBrand) renderBranchButtons(currentHomeBrand);
+    
+    if (result.error && !result.fromCache) {
+        console.warn('[BranchDirectory] ไม่สามารถโหลดรายชื่อสาขาได้:', result.error);
     }
+}
 
     function openHelpModal() { document.getElementById('help_modal').classList.add('show'); }
     function closeHelpModal() { document.getElementById('help_modal').classList.remove('show'); }
