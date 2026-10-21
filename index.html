@@ -2788,47 +2788,53 @@
     }
 
     function initBranchOtpDigitInputs() {
-        OTP_DIGIT_IDS.forEach((id, idx) => {
-            const el = document.getElementById(id);
-            if (!el || el.dataset.otpBound) return;
-            el.dataset.otpBound = '1';
-            el.addEventListener('input', () => {
-                el.value = el.value.replace(/[^0-9]/g, '').slice(0, 1);
-                if (el.value && idx < OTP_DIGIT_IDS.length - 1) {
-                    const next = document.getElementById(OTP_DIGIT_IDS[idx + 1]);
-                    if (next) next.focus();
-                }
-            });
-            el.addEventListener('keydown', (e) => {
-                if (e.key === 'Enter') { e.preventDefault(); submitBranchOtp(); return; }
-                if (e.key === 'Backspace' && !el.value && idx > 0) {
-                    const prev = document.getElementById(OTP_DIGIT_IDS[idx - 1]);
-                    if (prev) { prev.focus(); prev.select(); }
-                } else if (e.key === 'ArrowLeft' && idx > 0) {
-                    const prev = document.getElementById(OTP_DIGIT_IDS[idx - 1]);
-                    if (prev) prev.focus();
-                } else if (e.key === 'ArrowRight' && idx < OTP_DIGIT_IDS.length - 1) {
-                    const next = document.getElementById(OTP_DIGIT_IDS[idx + 1]);
-                    if (next) next.focus();
-                }
-            });
-            el.addEventListener('paste', (e) => {
-                const clip = (e.clipboardData || window.clipboardData);
-                const text = clip ? clip.getData('text').replace(/[^0-9]/g, '') : '';
-                if (!text) return;
-                e.preventDefault();
-                OTP_DIGIT_IDS.forEach((did, i) => {
-                    const d = document.getElementById(did);
-                    if (d) d.value = text[i] || '';
-                });
-                const nextEmptyIdx = OTP_DIGIT_IDS.findIndex(did => !document.getElementById(did).value);
-                const focusIdx = nextEmptyIdx === -1 ? OTP_DIGIT_IDS.length - 1 : nextEmptyIdx;
-                const focusEl = document.getElementById(OTP_DIGIT_IDS[focusIdx]);
-                if (focusEl) focusEl.focus();
-                if (text.length >= 3) submitBranchOtp();
-            });
+    OTP_DIGIT_IDS.forEach((id, idx) => {
+        const el = document.getElementById(id);
+        if (!el || el.dataset.otpBound) return;
+        el.dataset.otpBound = '1';
+        el.addEventListener('input', () => {
+            el.value = el.value.replace(/[^0-9]/g, '').slice(0, 1);
+            if (el.value && idx < OTP_DIGIT_IDS.length - 1) {
+                const next = document.getElementById(OTP_DIGIT_IDS[idx + 1]);
+                if (next) next.focus();
+            }
+            
+            // 👉 เพิ่มเช็คตรงนี้: ถ้ากรอกครบ 3 หลักแล้ว ให้กดส่ง/เลือกสาขาอัตโนมัติทันที
+            const currentDigits = getBranchOtpDigits();
+            if (currentDigits.length === 3) {
+                submitBranchOtp();
+            }
         });
-    }
+        el.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') { e.preventDefault(); submitBranchOtp(); return; }
+            if (e.key === 'Backspace' && !el.value && idx > 0) {
+                const prev = document.getElementById(OTP_DIGIT_IDS[idx - 1]);
+                if (prev) { prev.focus(); prev.select(); }
+            } else if (e.key === 'ArrowLeft' && idx > 0) {
+                const prev = document.getElementById(OTP_DIGIT_IDS[idx - 1]);
+                if (prev) prev.focus();
+            } else if (e.key === 'ArrowRight' && idx < OTP_DIGIT_IDS.length - 1) {
+                const next = document.getElementById(OTP_DIGIT_IDS[idx + 1]);
+                if (next) next.focus();
+            }
+        });
+        el.addEventListener('paste', (e) => {
+            const clip = (e.clipboardData || window.clipboardData);
+            const text = clip ? clip.getData('text').replace(/[^0-9]/g, '') : '';
+            if (!text) return;
+            e.preventDefault();
+            OTP_DIGIT_IDS.forEach((did, i) => {
+                const d = document.getElementById(did);
+                if (d) d.value = text[i] || '';
+            });
+            const nextEmptyIdx = OTP_DIGIT_IDS.findIndex(did => !document.getElementById(did).value);
+            const focusIdx = nextEmptyIdx === -1 ? OTP_DIGIT_IDS.length - 1 : nextEmptyIdx;
+            const focusEl = document.getElementById(OTP_DIGIT_IDS[focusIdx]);
+            if (focusEl) focusEl.focus();
+            if (text.length >= 3) submitBranchOtp();
+        });
+    });
+}
 
     function resetBranchOtpUI(brand) {
         const errEl = document.getElementById('branch_otp_error');
