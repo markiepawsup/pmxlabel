@@ -1761,6 +1761,39 @@
      DRUG_PRESETS/UI_TEXT/ฯลฯ ตั้งแต่บรรทัดแรกที่รัน) -->
 <script src="data.js"></script>
 <script>
+    // v1.25: กันพิมพ์ไม่ออก - บันทึกสถิติการพิมพ์ (ถ้าไฟล์นี้ยังไม่มีฟังก์ชัน recordPrintStatistics ให้ใช้ตัวสำรองนี้ / ถ้ามีอยู่แล้วจะไม่ถูกทับ)
+    if (typeof window.recordPrintStatistics !== 'function') {
+        window.recordPrintStatistics = function (drugName, branch) {
+            try {
+                const k = 'pharmax_print_stats';
+                const s = JSON.parse(localStorage.getItem(k) || '{}');
+                const key = (branch || '') + '|' + (drugName || '');
+                s[key] = (s[key] || 0) + 1;
+                localStorage.setItem(k, JSON.stringify(s));
+            } catch (e) { /* ไม่ให้การบันทึกสถิติทำให้พิมพ์ไม่ได้ */ }
+        };
+    }
+    // v1.25: ชื่อหัวข้อ "ชื่อผู้ใช้ยา" ทุกภาษา - ต้องประกาศไว้บนสุดของสคริปต์ (ถูกเรียกใช้ตั้งแต่ตอนโหลดหน้า)
+    const PATIENT_TITLES = {
+        "th": "ชื่อผู้ใช้ยา",
+        "en": "Medication User Name",
+        "ja": "服用者名",
+        "ko": "복용자명",
+        "zh-CN": "用药人姓名",
+        "zh-TW": "用藥者姓名",
+        "es": "Nombre del usuario",
+        "fr": "Nom de l'utilisateur",
+        "ru": "Имя принимающего",
+        "ar": "اسم مستخدم الدواء",
+        "my": "ဆေးသုံးစွဲသူအမည်",
+        "vi": "Tên người dùng thuốc",
+        "km": "ឈ្មោះអ្នកប្រើប្រាស់ថ្នាំ",
+        "it": "Nome dell'utilizzatore",
+        "de": "Name des Anwenders",
+        "hi": "दवा उपयोगकर्ता का नाम"
+};
+    function patientTitle(lang) { return PATIENT_TITLES[lang] || PATIENT_TITLES.th; }
+
     let currentLang = 'en';
     let currentBranch = 'PM017';
 
@@ -2735,7 +2768,7 @@
             labelBoxEl.classList.toggle('hide-hours', _labelHoursHidden);
         }
         document.getElementById('lbl_title_drug').innerText = t.drug;
-        document.getElementById('lbl_title_patient').innerText = t.patient || 'Patient Name';
+        document.getElementById('lbl_title_patient').innerText = patientTitle(currentLang);
         document.getElementById('lbl_title_indication').innerText = t.indication;
         document.getElementById('lbl_title_type').innerText = t.type;
         document.getElementById('lbl_title_time').innerText = t.time;
@@ -3045,6 +3078,7 @@
     //   เว้นว่าง = ไม่แสดงบรรทัดนี้ (ชื่อยาขึ้นเป็นบรรทัดแรกเหมือนเดิม)
     //   ชื่อเก็บเฉพาะในเบราว์เซอร์เครื่องนี้ (ประวัติ/คิว/draft) ไม่ถูกส่งไป Google Sheet
     // ==========================================================================
+
     function sanitizePatientName(v) {
         return String(v == null ? '' : v).toUpperCase()
             .replace(/[^A-Z .'\-]/g, '')
@@ -5204,7 +5238,7 @@
                         <div class="sub-header ${hoursKey === 'pharmacyLine3' ? 'label-hours-line' : ''}">${branchText.pharmacyLine3 || ''}</div>
                         <div class="sub-header ${hoursKey === 'pharmacyLine4' ? 'label-hours-line' : ''}">${branchText.pharmacyLine4 || ''}</div>
                     </div>
-                    ${item.patientName ? `<div class="label-row" style="align-items: center;"><span class="label-title">${t.patient || 'Patient Name'} <span class="thai-text">(ชื่อผู้ใช้ยา)</span>:</span><div class="label-value" style="white-space: normal; text-transform: uppercase;">${escapeHtml(item.patientName)}</div></div>` : ''}
+                    ${item.patientName ? `<div class="label-row" style="align-items: center;"><span class="label-title">${patientTitle(lang)} <span class="thai-text">(ชื่อผู้ใช้ยา)</span>:</span><div class="label-value" style="white-space: normal; text-transform: uppercase;">${escapeHtml(item.patientName)}</div></div>` : ''}
                     <div class="label-row" style="align-items: center;">
                         <span class="label-title">${t.drug} <span class="thai-text">(ชื่อยา)</span>:</span>
                         <div class="label-value" style="white-space: normal;">${escapeHtml(item.drugName)}</div>
