@@ -182,6 +182,7 @@ function getBrandForBranch(code) {
 
 const UI_TEXT = {
     th: {
+        patient: "ชื่อผู้ใช้ยา",
         drug: "ชื่อยา", indication: "สรรพคุณ", type: "ชนิด",
         morning: "เช้า", noon: "กลางวัน", evening: "เย็น", bed: "ก่อนนอน",
         time: "เวลา", advice: "คำแนะนำ",
@@ -193,6 +194,7 @@ const UI_TEXT = {
         mealTimes: { before30:"ก่อนอาหารอย่างน้อย 30 นาที", after:"หลังอาหาร", afterImmediate:"หลังอาหารทันที", withMeal:"พร้อมอาหาร", any:"ไม่ขึ้นกับมื้ออาหาร" }
     },
     ja: {
+        patient: "患者名",
         drug: "薬", indication: "効能", type: "種類",
         morning: "朝", noon: "昼", evening: "夕", bed: "就寝前",
         time: "時間", advice: "注意事項",
@@ -200,6 +202,7 @@ const UI_TEXT = {
         mealTimes: { before30:"食前30分以上", after:"食後", afterImmediate:"食直後", withMeal:"食事中", any:"食事に関係なく" }
     },
     en: {
+        patient: "Patient Name",
         drug: "Drug", indication: "Indication", type: "Type",
         morning: "Morning", noon: "Noon", evening: "Evening", bed: "Before Bed",
         time: "Time", advice: "Precautions",
@@ -207,6 +210,7 @@ const UI_TEXT = {
         mealTimes: { before30:"30+ min Before Meal", after:"After Meal", afterImmediate:"Immediately After Meal", withMeal:"With Meal", any:"Regardless of Meal" }
     },
     ko: {
+        patient: "환자명",
         drug: "약", indication: "효능", type: "종류",
         morning: "아침", noon: "점심", evening: "저녁", bed: "취침 전",
         time: "복용 시간", advice: "주의사항",
@@ -214,6 +218,7 @@ const UI_TEXT = {
         mealTimes: { before30:"식전 30분 이상", after:"식후", afterImmediate:"식후 즉시", withMeal:"식사와 함께", any:"식사와 관계없이" }
     },
     "zh-CN": {
+        patient: "患者姓名",
         drug: "药品", indication: "功效", type: "种类",
         morning: "早上", noon: "中午", evening: "晚上", bed: "睡前",
         time: "服用时间", advice: "注意事项",
@@ -221,6 +226,7 @@ const UI_TEXT = {
         mealTimes: { before30:"饭前30分钟以上", after:"饭后", afterImmediate:"饭后立即", withMeal:"随餐", any:"与进食无关" }
     },
     "zh-TW": {
+        patient: "病患姓名",
         drug: "藥品", indication: "功效", type: "種類",
         morning: "早上", noon: "中午", evening: "晚上", bed: "睡前",
         time: "服用時間", advice: "注意事項",
@@ -228,6 +234,7 @@ const UI_TEXT = {
         mealTimes: { before30:"飯前30分鐘以上", after:"飯後", afterImmediate:"飯後立即", withMeal:"隨餐", any:"與進食無關" }
     },
     es: {
+        patient: "Nombre del paciente",
         drug: "Medicamento", indication: "Indicación", type: "Tipo",
         morning: "Mañana", noon: "Mediodía", evening: "Tarde", bed: "Antes de dormir",
         time: "Horario", advice: "Precauciones",
@@ -235,6 +242,7 @@ const UI_TEXT = {
         mealTimes: { before30:"30+ min antes de comer", after:"Después de comer", afterImmediate:"Inmediatamente después de comer", withMeal:"Con las comidas", any:"Sin relación con las comidas" }
     },
     fr: {
+        patient: "Nom du patient",
         drug: "Médicament", indication: "Indication", type: "Type",
         morning: "Matin", noon: "Midi", evening: "Soir", bed: "Avant le coucher",
         time: "Horaire", advice: "Précautions",
@@ -242,6 +250,7 @@ const UI_TEXT = {
         mealTimes: { before30:"30+ min avant le repas", after:"Après le repas", afterImmediate:"Immédiatement après le repas", withMeal:"Avec le repas", any:"Sans rapport avec les repas" }
     },
     ru: {
+        patient: "Имя пациента",
         drug: "Лекарство", indication: "Показание", type: "Тип",
         morning: "Утро", noon: "День", evening: "Вечер", bed: "Перед сном",
         time: "Время приёма", advice: "Меры предосторожности",
@@ -249,6 +258,7 @@ const UI_TEXT = {
         mealTimes: { before30:"За 30+ мин до еды", after:"После еды", afterImmediate:"Сразу после еды", withMeal:"Во время еды", any:"Независимо от приёма пищи" }
     },
     ar: {
+        patient: "اسم المريض",
         drug: "الدواء", indication: "دواعي الاستعمال", type: "النوع",
         morning: "الصباح", noon: "الظهر", evening: "المساء", bed: "قبل النوم",
         time: "وقت الجرعة", advice: "احتياطات",
@@ -256,6 +266,7 @@ const UI_TEXT = {
         mealTimes: { before30:"قبل الأكل بـ 30 دقيقة أو أكثر", after:"بعد الأكل", afterImmediate:"بعد الأكل مباشرة", withMeal:"مع الطعام", any:"بغض النظر عن الطعام" }
     },
     my: {
+        patient: "လူနာအမည်",
         drug: "ဆေး", indication: "အသုံးပြုရသည့်ရောဂါ", type: "အမျိုးအစား",
         morning: "မနက်", noon: "နေ့လယ်", evening: "ညနေ", bed: "အိပ်ရာမဝင်မီ",
         time: "သောက်ချိန်", advice: "သတိပြုရန်အချက်များ",
@@ -263,6 +274,7 @@ const UI_TEXT = {
         mealTimes: { before30:"အစားအစာမစားမီ ၃၀ မိနစ်ကျော်", after:"အစားအစာစားပြီး", afterImmediate:"အစားအစာစားပြီးချက်ချင်း", withMeal:"အစားအစာနှင့်အတူ", any:"အစားအသောက်နှင့်မသက်ဆိုင်" }
     },
     vi: {
+        patient: "Tên bệnh nhân",
         drug: "Thuốc", indication: "Công dụng", type: "Loại",
         morning: "Sáng", noon: "Trưa", evening: "Chiều/Tối", bed: "Trước khi ngủ",
         time: "Thời điểm dùng", advice: "Lưu ý",
@@ -270,6 +282,7 @@ const UI_TEXT = {
         mealTimes: { before30:"Trước ăn 30+ phút", after:"Sau ăn", afterImmediate:"Ngay sau khi ăn", withMeal:"Cùng bữa ăn", any:"Không liên quan đến bữa ăn" }
     },
     km: {
+        patient: "ឈ្មោះអ្នកជំងឺ",
         drug: "ថ្នាំ", indication: "ប្រសិទ្ធភាព", type: "ប្រភេទ",
         morning: "ព្រឹក", noon: "ថ្ងៃត្រង់", evening: "ល្ងាច", bed: "មុនចូលគេង",
         time: "ពេលវេលាប្រើប្រាស់", advice: "ការប្រុងប្រយ័ត្ន",
@@ -277,6 +290,7 @@ const UI_TEXT = {
         mealTimes: { before30:"មុនអាហារ 30+ នាទី", after:"បន្ទាប់ពីអាហារ", afterImmediate:"ភ្លាមៗបន្ទាប់ពីអាហារ", withMeal:"ជាមួយអាហារ", any:"មិនទាក់ទងនឹងអាហារ" }
     },
     it: {
+        patient: "Nome paziente",
         drug: "Farmaco", indication: "Indicazione", type: "Tipo",
         morning: "Mattina", noon: "Mezzogiorno", evening: "Sera", bed: "Prima di dormire",
         time: "Orario", advice: "Precauzioni",
@@ -284,6 +298,7 @@ const UI_TEXT = {
         mealTimes: { before30:"30+ min prima dei pasti", after:"Dopo i pasti", afterImmediate:"Subito dopo i pasti", withMeal:"Durante i pasti", any:"Indipendentemente dai pasti" }
     },
     de: {
+        patient: "Patientenname",
         drug: "Medikament", indication: "Indikation", type: "Art",
         morning: "Morgens", noon: "Mittags", evening: "Abends", bed: "Vor dem Schlafengehen",
         time: "Einnahmezeit", advice: "Hinweise",
@@ -291,6 +306,7 @@ const UI_TEXT = {
         mealTimes: { before30:"30+ Min. vor dem Essen", after:"Nach dem Essen", afterImmediate:"Unmittelbar nach dem Essen", withMeal:"Zu den Mahlzeiten", any:"Unabhängig von den Mahlzeiten" }
     },
     hi: {
+        patient: "मरीज़ का नाम",
         drug: "दवा", indication: "उपयोग", type: "प्रकार",
         morning: "सुबह", noon: "दोपहर", evening: "शाम", bed: "सोने से पहले",
         time: "समय", advice: "सावधानियाँ",
