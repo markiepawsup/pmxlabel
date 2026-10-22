@@ -38,6 +38,8 @@
   const css = `
   .dsm-fab{position:fixed;right:18px;bottom:18px;z-index:9000;background:#04B085;color:#fff;border:none;border-radius:999px;padding:12px 18px;font:700 .9rem inherit;font-family:inherit;box-shadow:0 4px 14px rgba(0,0,0,.25);cursor:pointer}
   .dsm-fab:hover{filter:brightness(.93)}
+  .dsm-fab.in-header{position:absolute;right:14px;top:50%;transform:translateY(-50%);bottom:auto;padding:8px 14px;font-size:.82rem;box-shadow:none}
+  @media (max-width:700px){.dsm-fab.in-header{position:static;transform:none;margin:6px 10px}}
   .dsm-overlay{position:fixed;inset:0;background:rgba(10,25,50,.55);z-index:9500;display:none;align-items:center;justify-content:center;padding:12px}
   .dsm-overlay.open{display:flex}
   .dsm-modal{background:#fff;border-radius:14px;width:100%;max-width:560px;max-height:92vh;overflow:auto;padding:18px 20px 20px;box-shadow:0 10px 40px rgba(0,0,0,.35);font-family:inherit;color:#222}
@@ -64,7 +66,18 @@
   const overlay = document.createElement('div');
   overlay.className = 'dsm-overlay';
   overlay.innerHTML = '<div class="dsm-modal" role="dialog" aria-modal="true"><div id="dsm_body"></div></div>';
-  document.body.appendChild(fab); document.body.appendChild(overlay);
+  document.body.appendChild(overlay);
+  // วางปุ่มไว้ในแถบหัวเว็บ (ส่วน no-print ที่ไม่ถูกพิมพ์) แทนการลอยบนหน้าจอ
+  (function placeButton() {
+    const header = document.querySelector('.app-header');
+    if (header) {
+      if (getComputedStyle(header).position === 'static') header.style.position = 'relative';
+      fab.classList.add('in-header');
+      header.appendChild(fab);
+    } else {
+      document.body.appendChild(fab);   // ไม่พบแถบหัว: ใช้ปุ่มลอยเดิม (ซ่อนตอนพิมพ์)
+    }
+  })();
   const body = () => $('#dsm_body', overlay);
 
   const open = () => { overlay.classList.add('open'); session ? viewForm() : viewLogin(); };
