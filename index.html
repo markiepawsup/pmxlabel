@@ -124,12 +124,6 @@
         textarea { resize: vertical; }
         #in_drug_name, #out_drug_name { text-transform: uppercase; }
         #in_patient_name, #out_patient_name { text-transform: uppercase; }
-        /* v1.25: บรรทัดชื่อผู้ใช้ยา (บรรทัดแรกสุดก่อนชื่อยา) */
-        .label-row.patient-name-row { margin-bottom: 4px; }
-        .label-row.patient-name-row .label-value {
-            margin-left: 0; font-weight: 900 !important; letter-spacing: 0.3px; text-transform: uppercase;
-            font-size: max(6.5pt, calc(9.5pt * var(--label-scale)));
-        }
 
         /* --- Smart Autocomplete Popup --- */
         .smart-popup-list {
@@ -1508,8 +1502,9 @@
                     <div class="sub-header" id="lbl_pharm4"></div>
                 </div>
         
-                <div class="label-row patient-name-row" id="row_patient_name" style="display:none;">
-                    <div class="label-value" id="out_patient_name"></div>
+                <div class="label-row" id="row_patient_name" style="display:none; align-items: center;">
+                    <span class="label-title"><span id="lbl_title_patient">ชื่อผู้ใช้ยา</span> <span class="thai-text">(ชื่อผู้ใช้ยา)</span>:</span>
+                    <div class="label-value" id="out_patient_name" style="white-space: normal; overflow-wrap: break-word; word-break: break-word;"></div>
                 </div>
                 <div class="label-row" style="align-items: center;">
                     <span class="label-title"><span id="lbl_title_drug"></span> <span class="thai-text">(ชื่อยา)</span>:</span>
@@ -2740,6 +2735,7 @@
             labelBoxEl.classList.toggle('hide-hours', _labelHoursHidden);
         }
         document.getElementById('lbl_title_drug').innerText = t.drug;
+        document.getElementById('lbl_title_patient').innerText = t.patient || 'Patient Name';
         document.getElementById('lbl_title_indication').innerText = t.indication;
         document.getElementById('lbl_title_type').innerText = t.type;
         document.getElementById('lbl_title_time').innerText = t.time;
@@ -5208,7 +5204,7 @@
                         <div class="sub-header ${hoursKey === 'pharmacyLine3' ? 'label-hours-line' : ''}">${branchText.pharmacyLine3 || ''}</div>
                         <div class="sub-header ${hoursKey === 'pharmacyLine4' ? 'label-hours-line' : ''}">${branchText.pharmacyLine4 || ''}</div>
                     </div>
-                    ${item.patientName ? `<div class="label-row patient-name-row"><div class="label-value">${escapeHtml(item.patientName)}</div></div>` : ''}
+                    ${item.patientName ? `<div class="label-row" style="align-items: center;"><span class="label-title">${t.patient || 'Patient Name'} <span class="thai-text">(ชื่อผู้ใช้ยา)</span>:</span><div class="label-value" style="white-space: normal; text-transform: uppercase;">${escapeHtml(item.patientName)}</div></div>` : ''}
                     <div class="label-row" style="align-items: center;">
                         <span class="label-title">${t.drug} <span class="thai-text">(ชื่อยา)</span>:</span>
                         <div class="label-value" style="white-space: normal;">${escapeHtml(item.drugName)}</div>
