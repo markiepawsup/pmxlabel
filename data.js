@@ -1,9 +1,9 @@
 
 // ==========================================
-// PHARMAX LABEL APP - DATA FILE (v1.24)
+// PHARMAX LABEL APP - DATA FILE (v1.25)
 // ==========================================
 
-const APP_VERSION = 'v1.24';
+const APP_VERSION = 'v1.25';
 
 const BRANCHES = {
     PM017: {
