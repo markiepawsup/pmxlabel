@@ -55,7 +55,8 @@
   .dsm-hint{font-size:.72rem;color:#666;font-weight:400}
   .dsm-link{background:none;border:none;color:#16478E;text-decoration:underline;cursor:pointer;font:inherit;font-size:.82rem;padding:0;margin-top:10px}
   .dsm-who{font-size:.78rem;color:#555;margin-bottom:6px}
-  #dsm_generic{text-transform:uppercase}`;
+  #dsm_generic{text-transform:uppercase}
+  @media print{.dsm-fab,.dsm-overlay{display:none !important}}`;
   const style = document.createElement('style'); style.textContent = css; document.head.appendChild(style);
 
   const fab = document.createElement('button');
