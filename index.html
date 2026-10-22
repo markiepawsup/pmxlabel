@@ -123,6 +123,13 @@
         }
         textarea { resize: vertical; }
         #in_drug_name, #out_drug_name { text-transform: uppercase; }
+        #in_patient_name, #out_patient_name { text-transform: uppercase; }
+        /* v1.25: บรรทัดชื่อผู้ใช้ยา (บรรทัดแรกสุดก่อนชื่อยา) */
+        .label-row.patient-name-row { margin-bottom: 4px; }
+        .label-row.patient-name-row .label-value {
+            margin-left: 0; font-weight: 900 !important; letter-spacing: 0.3px; text-transform: uppercase;
+            font-size: max(6.5pt, calc(9.5pt * var(--label-scale)));
+        }
 
         /* --- Smart Autocomplete Popup --- */
         .smart-popup-list {
@@ -1286,6 +1293,13 @@
         </div>
 
         <div class="form-group">
+            <label>👤 ชื่อผู้ใช้ยา (ภาษาอังกฤษ): <span class="hint">พิมพ์ชื่อ-สกุลเป็นภาษาอังกฤษ ระบบแปลงเป็นตัวพิมพ์ใหญ่ให้เอง · เว้นว่าง = ไม่แสดงบนฉลาก</span></label>
+            <input type="text" id="in_patient_name" placeholder="เช่น SOMCHAI JAIDEE" maxlength="40" autocomplete="off" autocapitalize="characters" spellcheck="false"
+                   oninput="onPatientNameInput(this, event)" oncompositionend="onPatientNameInput(this)">
+            <div id="patient_name_hint" class="hint" style="display:none; color:#c0392b;">⚠️ รับเฉพาะตัวอักษรภาษาอังกฤษ (A-Z) — ตัวอักษรอื่นถูกลบออกให้แล้ว</div>
+        </div>
+
+        <div class="form-group">
             <label>ชื่อยา (Generic name / Trade name): <span class="hint">พิมพ์แล้วเลือกจากรายการ หรือกด Tab/Space เพื่อรับคำแนะนำอัตโนมัติ</span></label>
             <div class="ghost-wrap">
                 <div class="ghost-overlay" id="ghost_drug_name" aria-hidden="true"></div>
@@ -1494,6 +1508,9 @@
                     <div class="sub-header" id="lbl_pharm4"></div>
                 </div>
         
+                <div class="label-row patient-name-row" id="row_patient_name" style="display:none;">
+                    <div class="label-value" id="out_patient_name"></div>
+                </div>
                 <div class="label-row" style="align-items: center;">
                     <span class="label-title"><span id="lbl_title_drug"></span> <span class="thai-text">(ชื่อยา)</span>:</span>
                     <div class="label-value" id="out_drug_name" style="white-space: normal; overflow-wrap: break-word; word-break: break-word;"></div>
@@ -3027,9 +3044,51 @@
         return ['help_modal', 'cheat_modal', 'special_pop_modal', 'safety_alert_modal'].some(id => document.getElementById(id).classList.contains('show'));
     }
 
+    // ==========================================================================
+    // v1.25: ชื่อผู้ใช้ยา - บรรทัดแรกสุดบนฉลาก (ก่อนชื่อยา) ภาษาอังกฤษตัวพิมพ์ใหญ่อัตโนมัติ
+    //   เว้นว่าง = ไม่แสดงบรรทัดนี้ (ชื่อยาขึ้นเป็นบรรทัดแรกเหมือนเดิม)
+    //   ชื่อเก็บเฉพาะในเบราว์เซอร์เครื่องนี้ (ประวัติ/คิว/draft) ไม่ถูกส่งไป Google Sheet
+    // ==========================================================================
+    function sanitizePatientName(v) {
+        return String(v == null ? '' : v).toUpperCase()
+            .replace(/[^A-Z .'\-]/g, '')
+            .replace(/\s{2,}/g, ' ')
+            .replace(/^\s+/, '');
+    }
+    function getPatientName() {
+        const el = document.getElementById('in_patient_name');
+        return el ? sanitizePatientName(el.value).trim() : '';
+    }
+    function setPatientName(v) {
+        const el = document.getElementById('in_patient_name');
+        if (!el) return;
+        el.value = sanitizePatientName(v);
+        const h = document.getElementById('patient_name_hint');
+        if (h) h.style.display = 'none';
+    }
+    function onPatientNameInput(el, ev) {
+        if (ev && ev.isComposing) return;   // กำลังพิมพ์ผ่าน IME (ญี่ปุ่น/จีน ฯลฯ) -> รอให้พิมพ์เสร็จก่อนค่อยกรอง
+        const raw = el.value;
+        const pos = el.selectionStart;
+        const cleaned = sanitizePatientName(raw);
+        if (cleaned !== raw) {
+            const caret = sanitizePatientName(raw.slice(0, pos)).length;
+            el.value = cleaned;
+            try { el.setSelectionRange(caret, caret); } catch (e) { /* ignore */ }
+        }
+        // แจ้งเตือนเฉพาะกรณีมีตัวอักษรที่ไม่ใช่ภาษาอังกฤษถูกตัดทิ้ง (ไม่นับการแปลงเป็นตัวพิมพ์ใหญ่/ช่องว่างซ้ำ)
+        const dropped = raw.toUpperCase().replace(/[A-Z .'\-\s]/g, '');
+        const h = document.getElementById('patient_name_hint');
+        if (h) h.style.display = dropped ? 'block' : 'none';
+        updateLabel();
+    }
+
     function updateLabel() {
         stampCurrentDate();
         document.getElementById('out_drug_name').innerText = document.getElementById('in_drug_name').value.toUpperCase();
+        const _pn = getPatientName();
+        document.getElementById('out_patient_name').innerText = _pn;
+        document.getElementById('row_patient_name').style.display = _pn ? 'flex' : 'none';
 
         let typeKey = document.getElementById('sel_drug_type').value;
         const sheetDrugName = document.getElementById('in_drug_name').value;
@@ -3556,6 +3615,7 @@
     }
 
     function clearAll() {
+        setPatientName('');
         document.getElementById('in_drug_name').value = '';
         document.getElementById('in_drug_name').classList.remove('field-invalid');
         document.getElementById('in_indication').value = '';
@@ -3797,6 +3857,7 @@
         return {
             branch: currentBranch,
             lang: currentLang,
+            patientName: getPatientName(),
             drugName: document.getElementById('in_drug_name').value.toUpperCase(),
             drugType: document.getElementById('sel_drug_type').value,
             meal: document.getElementById('sel_meal').value,
@@ -3869,6 +3930,7 @@
         if (!draft) return;
         if (draft.branch) selectBranch(draft.branch);
         if (draft.lang && UI_TEXT[draft.lang]) setLanguage(draft.lang);
+        setPatientName(draft.patientName || '');
         document.getElementById('in_drug_name').value = draft.drugName || '';
         document.getElementById('sel_drug_type').value = draft.drugType || 'tablet';
         document.getElementById('sel_meal').value = draft.meal || '';
@@ -3925,6 +3987,7 @@
         if (entry.branch) selectBranch(entry.branch); // v1.18: ไม่ผูกกับ BRANCHES hardcode อีกต่อไป (getBranchText มี fallback ของตัวเองแล้ว)
         if (entry.lang && UI_TEXT[entry.lang]) setLanguage(entry.lang);
 
+        setPatientName(entry.patientName || '');
         document.getElementById('in_drug_name').value = entry.drugName;
         document.getElementById('sel_drug_type').value = entry.drugType;
         document.getElementById('sel_meal').value = entry.meal;
@@ -4158,7 +4221,7 @@
         renderQueueUI();
 
         // 👉 เคลียร์ฟอร์มทั้งหมด (รวมถึงช่อง สรรพคุณ และ คำแนะนำเพิ่มเติม) ทันทีหลังกดเข้าคิว
-        clearCurrentForm();
+        clearCurrentForm(true); // v1.25: เก็บชื่อผู้ใช้ยาไว้
     }
 
     function renderQueueUI() {
@@ -4194,6 +4257,7 @@
                         <div class="queue-card-info">
                             <span class="queue-card-index">${index + 1}</span>
                             <span class="queue-card-drug" title="${escapeHtml(item.drugName)}">${escapeHtml(item.drugName)}</span>
+                            ${item.patientName ? `<span class="queue-card-patient" title="ชื่อผู้ใช้ยา" style="font-size:0.7rem;color:#666;margin-left:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:120px;">👤 ${escapeHtml(item.patientName)}</span>` : ''}
                             ${warnBadgeHtml(item)}
                             <span class="queue-card-dose">${escapeHtml(shortDose)}</span>
                         </div>
@@ -4971,7 +5035,7 @@
     }
 
     function startOverQueue() {
-        const formHasData = !!document.getElementById('in_drug_name').value.trim() || clinProfileActive(clinReadProfile());
+        const formHasData = !!document.getElementById('in_drug_name').value.trim() || !!getPatientName() || clinProfileActive(clinReadProfile());
         if (labelQueue.length === 0 && !formHasData) { clearCurrentForm(); return; }
         let msg = '⚠️ ยืนยันล้างข้อมูลทั้งหมดเพื่อเริ่มเคสใหม่?\n';
         if (labelQueue.length > 0) {
@@ -4989,7 +5053,9 @@
         clearCurrentForm();
     }
 
-    function clearCurrentForm() {
+    // v1.25: keepPatient=true (ใช้ตอน "เพิ่มเข้าคิว") -> เก็บชื่อผู้ใช้ยาไว้ เพื่อจ่ายยาหลายตัวให้คนเดิมต่อได้เลย
+    function clearCurrentForm(keepPatient) {
+        if (keepPatient !== true) setPatientName('');
         document.getElementById('in_drug_name').value = '';
         document.getElementById('in_drug_name').classList.remove('field-invalid');
         document.getElementById('in_indication').value = '';     // ล้างช่องสรรพคุณ
@@ -5054,6 +5120,7 @@
         let title = prompt('ตั้งชื่อชุดยาโปรดนี้ (เช่น ชุดยาลดไข้แก้แพ้):', drugName);
         if (!title) return;
         let item = snapshotFormState();
+        delete item.patientName;   // v1.25: ชุดยาโปรดไม่เก็บชื่อผู้ใช้ยา
         item.title = title;
         try {
             let favs = getFavoritePresets();
@@ -5141,6 +5208,7 @@
                         <div class="sub-header ${hoursKey === 'pharmacyLine3' ? 'label-hours-line' : ''}">${branchText.pharmacyLine3 || ''}</div>
                         <div class="sub-header ${hoursKey === 'pharmacyLine4' ? 'label-hours-line' : ''}">${branchText.pharmacyLine4 || ''}</div>
                     </div>
+                    ${item.patientName ? `<div class="label-row patient-name-row"><div class="label-value">${escapeHtml(item.patientName)}</div></div>` : ''}
                     <div class="label-row" style="align-items: center;">
                         <span class="label-title">${t.drug} <span class="thai-text">(ชื่อยา)</span>:</span>
                         <div class="label-value" style="white-space: normal;">${escapeHtml(item.drugName)}</div>
@@ -5308,7 +5376,7 @@
     //  - ไม่ดักคีย์เมื่อเปิดป๊อปอัพ หรือโฟกัสอยู่ช่องอื่นนอกฟอร์มยา (เช่น ช่องข้อมูลผู้ป่วย) -> ให้เบราว์เซอร์ Undo ตามปกติ
     //  - ย้อนได้เฉพาะ "ช่องในฟอร์มยา" ไม่รวมคิวพิมพ์ (คิวกู้คืนได้จากรายการ "คิวที่เพิ่งพิมพ์/ล้าง")
     // ==========================================================================
-    const UNDO_FIELD_IDS = ['in_drug_name', 'in_indication', 'in_advice', 'sel_drug_type', 'sel_meal', 'qty_morning', 'qty_noon', 'qty_evening', 'qty_bed'];
+    const UNDO_FIELD_IDS = ['in_patient_name', 'in_drug_name', 'in_indication', 'in_advice', 'sel_drug_type', 'sel_meal', 'qty_morning', 'qty_noon', 'qty_evening', 'qty_bed'];
     const UNDO_MAX_STEPS = 50;
     let undoStack = [];
     let undoIndex = -1;
